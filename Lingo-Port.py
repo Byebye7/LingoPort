@@ -239,6 +239,8 @@ def reset():
     current_guess_string = ""
     game_result = ""
     CORRECT_GUESSES = [False,False,False,False,False]
+    for button in buttons:
+    	button.draw(SCREEN)
     pygame.display.update()
     button_hint(None)
     # for indicator in indicators:
@@ -269,7 +271,7 @@ def delete_letter():
 
     
 buttons = []
-buttons.append(Button(40,840,100,40,text="Hint",color=CYAN,highlightcolor=NEONPINK,function=button_hint))
+buttons.append(Button(40,740,100,40,text="Hint",color=CYAN,highlightcolor=NEONPINK,function=button_hint))
 
 for button in buttons:
     button.draw(SCREEN)
