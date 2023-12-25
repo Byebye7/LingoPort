@@ -228,7 +228,7 @@ def button_hint(params):
 
 def reset():
     # Resets all global variables to their default states.
-    global guesses_count, CORRECT_WORD, guesses, current_guess, current_guess_string, game_result
+    global guesses_count, CORRECT_WORD, guesses, current_guess, current_guess_string, game_result,CORRECT_GUESSES
     SCREEN.fill("white")
     SCREEN.blit(BACKGROUND, BACKGROUND_RECT)
     guesses_count = 0
