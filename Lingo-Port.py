@@ -12,8 +12,11 @@ def loadWordlist(filename='words.txt'):
 
     return retval
 
-def loadDictionary(filename='wordlist.pz'):
-    return pickle.load(open(filename,'rb'))
+
+def loadDictionary(filename='dictionary.txt'):
+    #use text file so we can make edits to dictionary
+    with open("dictionary.txt",'r') as f:
+        return f.read().splitlines()
 
 
 pygame.init()
@@ -64,7 +67,6 @@ guesses_count = 0
 # guesses is a 2D list that will store guesses. A guess will be a list of letters.
 # The list will be iterated through and each letter in each guess will be drawn on the screen.
 guesses = [[] for i in range(6)]
-print(guesses)
 current_guess = []
 current_guess_string = ""
 current_letter_bg_x = 110
@@ -101,7 +103,6 @@ class Letter:
 
     def moveup_row(self):
         if self.bg_y < 100:
-            print(self.text)
             self.delete()
         else:
             self.bg_y -= 100
@@ -121,50 +122,58 @@ class Letter:
 
 def check_guess(guess_to_check):
     # Goes through each letter and checks if it should be green, yellow, or grey.
-    global current_guess, current_guess_string, guesses_count, current_letter_bg_x, game_result,CORRECT_GUESSES,guesses
+    global DICTIONARY, current_guess, current_guess_string, guesses_count, current_letter_bg_x, game_result,CORRECT_GUESSES,guesses
     game_decided = False
-    LEFT_OVER = [i for i in CORRECT_WORD] # convert string to a list of characters to allow for deletion
-    for i in range(5):
-        #check for green letters
-        lowercase_letter = guess_to_check[i].text.lower()
-
-        if lowercase_letter in CORRECT_WORD:
-            if lowercase_letter == CORRECT_WORD[i]:
-                CORRECT_GUESSES[i] = True #Used to keep track of bonus letters
-                LEFT_OVER[i] = ''
-                guess_to_check[i].bg_color = GREEN
-                guess_to_check[i].text_color = "white"
-                if not game_decided:
-                    game_result = "W"
-    for i in range(5):
-        if guess_to_check[i].bg_color != GREEN:
+    if current_guess_string.lower() in DICTIONARY:
+        LEFT_OVER = [i for i in CORRECT_WORD] # convert string to a list of characters to allow for deletion
+        for i in range(5):
+            #check for green letters
             lowercase_letter = guess_to_check[i].text.lower()
-            try:
-                index = LEFT_OVER.index(lowercase_letter)
-            except ValueError:
-                index = -1
-            if index >= 0:
-                # letter exists in the word but in wrong place
-                LEFT_OVER[index] = ''
-                print(LEFT_OVER)
 
-                guess_to_check[i].bg_color = YELLOW
-                # for indicator in indicators:
-                #     if indicator.text == lowercase_letter.upper():
-                #         indicator.bg_color = YELLOW
-                #         indicator.draw()
-                guess_to_check[i].text_color = "white"
-                game_result = ""
-                game_decided = True
-            else:
-                game_result = ""
-                game_decided = True
-            
-    
-        guess_to_check[i].draw()
-        pygame.display.update()
+            if lowercase_letter in CORRECT_WORD:
+                if lowercase_letter == CORRECT_WORD[i]:
+                    CORRECT_GUESSES[i] = True #Used to keep track of bonus letters
+                    LEFT_OVER[i] = ''
+                    guess_to_check[i].bg_color = GREEN
+                    guess_to_check[i].text_color = "white"
+                    if not game_decided:
+                        game_result = "W"
+        for i in range(5):
+            if guess_to_check[i].bg_color != GREEN:
+                lowercase_letter = guess_to_check[i].text.lower()
+                try:
+                    index = LEFT_OVER.index(lowercase_letter)
+                except ValueError:
+                    index = -1
+                if index >= 0:
+                    # letter exists in the word but in wrong place
+                    LEFT_OVER[index] = ''
+                    print(LEFT_OVER)
 
-    
+                    guess_to_check[i].bg_color = YELLOW
+                    # for indicator in indicators:
+                    #     if indicator.text == lowercase_letter.upper():
+                    #         indicator.bg_color = YELLOW
+                    #         indicator.draw()
+                    guess_to_check[i].text_color = "white"
+                    game_result = ""
+                    game_decided = True
+                else:
+                    game_result = ""
+                    game_decided = True
+                
+        
+            guess_to_check[i].draw()
+            pygame.display.update()
+
+    else:
+        for i in range(5):
+            guess_to_check[i].bg_color = RED
+            guess_to_check[i].text_color = "white"
+            guess_to_check[i].draw()
+            pygame.display.update()
+
+
     guesses_count += 1
     current_guess = []
     current_guess_string = ""
@@ -182,7 +191,6 @@ def check_guess(guess_to_check):
 
 def play_again():
     # Puts the play again text on the screen.
-    print("hi")
     pygame.draw.rect(SCREEN, "white", (10, 600, 1000, 600))
     play_again_font = pygame.font.Font("assets/FreeSansBold.otf", 40)
     play_again_text = play_again_font.render("Press ENTER to Play Again!", True, "black")
@@ -201,12 +209,10 @@ def button_hint(params):
             if CORRECT_GUESSES[i] == False:
                 next_letter = i
                 break
-        print(next_letter)
         new_letter = Letter(CORRECT_WORD[next_letter].upper(), (current_letter_bg_x+next_letter*LETTER_X_SPACING, guesses_count*100+LETTER_Y_SPACING))
         new_letter.draw()
         CORRECT_GUESSES[next_letter] = True
 
-    print(CORRECT_GUESSES)
 
 def button_reset(params):
     global game_result
@@ -231,7 +237,7 @@ def reset():
     button_hint(None)
 
 
-def create_new_letter():
+def create_new_letter(key_pressed):
     # Creates a new letter and adds it to the guess.
     global current_guess_string, current_letter_bg_x
     current_guess_string += key_pressed
@@ -277,9 +283,15 @@ while True:
                 if game_result != "":
                     reset()
                 else:
-                    if len(current_guess_string) == 5 and current_guess_string.lower() in DICTIONARY:
+                    if len(current_guess_string) == 5:
                         check_guess(current_guess)
+                        # draw the all the letters that are already correct
+                        for i in range(5):
+                            if CORRECT_GUESSES[i] == True:
+                                new_letter = Letter(CORRECT_WORD[i].upper(), (current_letter_bg_x+i*LETTER_X_SPACING, guesses_count*100+LETTER_Y_SPACING))
+                                new_letter.draw()
 
+        
             elif event.key == pygame.K_BACKSPACE:
                 if len(current_guess_string) > 0:
                     delete_letter()
@@ -287,7 +299,7 @@ while True:
                 key_pressed = event.unicode.upper()
                 if key_pressed in "QWERTYUIOPASDFGHJKLZXCVBNM" and key_pressed != "":
                     if len(current_guess_string) < 5:
-                        create_new_letter()
+                        create_new_letter(key_pressed)
         elif event.type  == pygame.MOUSEBUTTONDOWN:
             mousePos = pygame.mouse.get_pos()
             for button in buttons:
