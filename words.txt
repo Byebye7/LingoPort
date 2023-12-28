@@ -231,7 +231,6 @@ harry
 hears
 heart
 heavy
-hence
 horse
 hotel
 house
@@ -288,6 +287,8 @@ might
 minor
 minus
 mixed
+mixer
+mixes
 model
 money
 month
