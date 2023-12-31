@@ -23,7 +23,7 @@ pygame.init()
 
 # Constants
 
-WORDS = loadWordlist()
+WORDS = random.shuffle(loadWordlist())
 DICTIONARY = loadDictionary()
 
 #WIDTH, HEIGHT = 633, 900
@@ -43,8 +43,9 @@ pygame.display.set_icon(ICON)
 #FILLED_OUTLINE = "#878a8c"
 
 #CORRECT_WORD = 'tests'
-CORRECT_WORD = random.choice(WORDS)
-CORRECT_GUESSES = [False,False,False,False,False]
+#CORRECT_WORD = random.choice(WORDS)
+CORRECT_WORD = WORDS.pop() #pop words off to prevent repeat words
+CORRECT_GUESSES = [False,False,False,False,False] # Used to track which bonus letter to give
 ALPHABET = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
 
 GUESSED_LETTER_FONT = pygame.font.Font("assets/FreeSansBold.otf", 50)
@@ -224,7 +225,8 @@ def reset():
     SCREEN.fill("white")
     SCREEN.blit(BACKGROUND, BACKGROUND_RECT)
     guesses_count = 0
-    CORRECT_WORD = random.choice(WORDS)
+    #CORRECT_WORD = random.choice(WORDS)
+    CORRECT_WORD = WORDS.pop() #pop words off to prevent repeat words
     #CORRECT_WORD = 'TESTS'
     guesses = [[] for i in range(6)]
     current_guess = []
